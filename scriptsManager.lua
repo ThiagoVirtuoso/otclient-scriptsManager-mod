@@ -137,6 +137,9 @@ function ScriptsManager.scriptBoxSet(widget, option)
 			local ret = loadstring("return " .. script)
 			if type(ret) == "function" then
 				scriptsManagerEvents[id] = ret()
+				if string.match(script, "bindKeyPress") then
+					scriptsManagerEvents[id] = ret
+				end
 			else
 				displayErrorBox("Scripts Manager", "Error script #".. id .." could not be run.")
 				option = false
@@ -153,8 +156,14 @@ function ScriptsManager.scriptBoxSet(widget, option)
 		listasWidget:enable()
 		scriptWidget:enable()
 		if scriptsManagerEvents[id] then
-			removeEvent(scriptsManagerEvents[id])
-			scriptsManagerEvents[id] = nil
+			if type(scriptsManagerEvents[id]) == "userdata" then
+				removeEvent(scriptsManagerEvents[id])
+				scriptsManagerEvents[id] = nil
+			elseif type(scriptsManagerEvents[id]) == "function" then
+				key = string.match(string.match(script, "'%w+'"), "%w+")
+				g_keyboard.unbindKeyPress(key)
+				scriptsManagerEvents[id] = nil
+			end
 		end
 	end
 
