@@ -31,17 +31,24 @@ end
 function ScriptsManager.terminate()
 	disconnect(g_game, { onGameStart = ScriptsManager.online,
 						 onGameEnd = ScriptsManager.offline})
-					   
+
+	for i,v in pairs(scriptsManagerEvents) do
+		if type(v) == "userdata" then
+			removeEvent(v)
+		elseif type(v) == "function" then
+			local scriptWidget = scriptsManagerPanel:getChildById('script_' .. i):getChildById('scriptText')
+			local script = scriptWidget:getText()
+			local key = string.match(string.match(script, "'%w+'"), "%w+")
+			g_keyboard.unbindKeyPress(key)
+		end
+	end
+
 	scriptsManagerButton:destroy()
 	scriptsManagerButton = nil
 	scriptsManagerWindow:destroy()
 	scriptsManagerWindow = nil
 	scriptsManagerPanel:destroy()
 	scriptsManagerPanel = nil
-
-	for i,v in pairs(scriptsManagerEvents) do
-		removeEvent(v)
-	end
 	scriptsManagerEvents = {}
 end
 
